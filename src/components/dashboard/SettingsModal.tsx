@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { X, User, Shield, Bell, CreditCard, HelpCircle, LogOut } from 'lucide-react';
+import { X, User, Shield, Bell, CreditCard, HelpCircle, LogOut, History, ChevronRight } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 
@@ -11,76 +11,97 @@ export default function SettingsModal({ isOpen, onClose, user }: { isOpen: boole
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-brand-charcoal/80 backdrop-blur-xl p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-brand-charcoal/90 backdrop-blur-xl p-4"
     >
       <motion.div 
-        initial={{ scale: 0.9, y: 20 }}
+        initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
-        className="w-full max-w-lg glass-card rounded-3xl overflow-hidden shadow-2xl"
+        className="w-full max-w-lg glass-card rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
       >
-        <div className="p-6 border-b border-brand-ivory/5 flex items-center justify-between">
-          <h2 className="font-display text-2xl font-bold">Preferences</h2>
+        <div className="p-8 border-b border-brand-ivory/5 flex items-center justify-between">
+          <h2 className="font-display text-2xl font-bold uppercase tracking-tight">Settings</h2>
           <button onClick={onClose} className="p-2 hover:bg-brand-slate rounded-xl transition-all">
             <X className="w-6 h-6" />
           </button>
         </div>
         
-        <div className="p-6 space-y-6">
-          <SettingItem 
-            icon={<User className="w-5 h-5" />} 
-            title="Profile Details" 
-            desc="Manage your personal information"
-            onClick={() => toast.info("Profile editing coming soon")}
-          />
-          <SettingItem 
-            icon={<Shield className="w-5 h-5" />} 
-            title="Privacy & Security" 
-            desc="Two-factor auth and data privacy"
-            onClick={() => toast.info("Security settings locked")}
-          />
-          <SettingItem 
-            icon={<Bell className="w-5 h-5" />} 
-            title="Notifications" 
-            desc="Configure smart alerts and nudges"
-            onClick={() => toast.success("Notification preferences saved")}
-          />
-          <SettingItem 
-            icon={<CreditCard className="w-5 h-5" />} 
-            title="Premium Plan" 
-            desc="Manage your subscription"
-            onClick={() => toast.info("You're on the early-access free tier")}
-          />
-          <div className="pt-4 border-t border-brand-ivory/5">
+        <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
+          {/* Profile Section */}
+          <div>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/20 mb-4 px-2">Profile</h3>
+            <div className="p-4 rounded-2xl bg-brand-slate border border-brand-ivory/5 flex items-center justify-between group cursor-pointer hover:bg-brand-slate/80 transition-all">
+              <div className="flex items-center gap-4">
+                <img 
+                  src={user?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.uid}`} 
+                  className="w-12 h-12 rounded-xl grayscale group-hover:grayscale-0 transition-all" 
+                  alt="Avatar"
+                />
+                <div>
+                  <div className="font-bold text-sm tracking-tight">{user?.displayName || 'Prakhar Verma'}</div>
+                  <div className="text-xs text-brand-ivory/40">hello@veltrix.com</div>
+                </div>
+              </div>
+              <button className="text-[10px] font-bold text-brand-accent px-3 py-1 rounded-lg border border-brand-accent/20">Edit Profile</button>
+            </div>
+          </div>
+
+          {/* Preferences Section */}
+          <SettingsSection title="Preferences">
+            <SettingsItem icon={<CreditCard className="w-4 h-4 text-brand-accent" />} label="Currency" value="INR (₹)" />
+            <SettingsItem icon={<Shield className="w-4 h-4 text-brand-accent" />} label="Theme" value="Dark" />
+            <SettingsItem icon={<Bell className="w-4 h-4 text-brand-accent" />} label="Notifications" isSwitch />
+          </SettingsSection>
+
+          {/* Security Section */}
+          <SettingsSection title="Security">
+            <SettingsItem icon={<Shield className="w-4 h-4 opacity-40" />} label="Change Password" hasArrow />
+          </SettingsSection>
+
+          {/* Data Section */}
+          <SettingsSection title="Data">
+            <SettingsItem icon={<History className="w-4 h-4 opacity-40" />} label="Export Data" hasArrow />
+          </SettingsSection>
+
+          {/* About Section */}
+          <SettingsSection title="About">
+            <SettingsItem label="About Veltrix" value="v1.0.0" />
             <button 
               onClick={() => auth.signOut()}
-              className="w-full p-4 rounded-2xl flex items-center justify-between bg-red-400/5 hover:bg-red-400/10 text-red-400 transition-all group"
+              className="w-full mt-4 flex items-center gap-3 p-4 rounded-2xl bg-red-400/5 text-red-400 text-sm font-bold border border-red-400/10 hover:bg-red-400/10 transition-all"
             >
-              <div className="flex items-center gap-3 font-semibold">
-                <LogOut className="w-5 h-5" />
-                Sign Out
-              </div>
-              <div className="text-xs opacity-40 group-hover:opacity-100 transition-opacity">v1.0.4 r7</div>
+              <LogOut className="w-4 h-4 text-red-400" />
+              Logout
             </button>
-          </div>
+          </SettingsSection>
         </div>
       </motion.div>
     </motion.div>
   );
 }
 
-function SettingItem({ icon, title, desc, onClick }: { icon: any, title: string, desc: string, onClick: () => void }) {
+function SettingsSection({ title, children }: { title: string, children: React.ReactNode }) {
   return (
-    <button 
-      onClick={onClick}
-      className="w-full p-4 rounded-2xl flex items-center gap-4 hover:bg-brand-slate/50 transition-all text-left group"
-    >
-      <div className="p-3 rounded-xl bg-brand-charcoal border border-brand-ivory/5 text-brand-accent group-hover:scale-110 transition-transform">
-        {icon}
+    <div>
+      <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/20 mb-3 px-2">{title}</h3>
+      <div className="space-y-1">
+        {children}
       </div>
-      <div className="flex-1">
-        <div className="font-semibold">{title}</div>
-        <div className="text-xs text-brand-ivory/40">{desc}</div>
+    </div>
+  );
+}
+
+function SettingsItem({ icon, label, value, hasArrow, isSwitch }: { icon?: React.ReactNode, label: string, value?: string, hasArrow?: boolean, isSwitch?: boolean }) {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-xl hover:bg-brand-slate transition-all group cursor-pointer">
+      <div className="flex items-center gap-4">
+        {icon && <div className="w-4 h-4">{icon}</div>}
+        <span className="text-sm font-medium tracking-tight text-brand-ivory/80">{label}</span>
       </div>
-    </button>
+      <div className="flex items-center gap-3">
+        {value && <span className="text-xs text-brand-ivory/40 font-medium">{value}</span>}
+        {hasArrow && <ChevronRight className="w-4 h-4 opacity-20 group-hover:opacity-100 transition-opacity" />}
+        {isSwitch && <div className="w-8 h-4 rounded-full bg-brand-accent/20 relative"><div className="absolute right-0.5 top-0.5 w-3 h-3 rounded-full bg-brand-accent transition-all" /></div>}
+      </div>
+    </div>
   );
 }

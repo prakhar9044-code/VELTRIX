@@ -3,26 +3,32 @@
 
 @theme {
   --color-brand-charcoal: #0F1115;
+  --color-brand-slate: #1A1D24;
   --color-brand-ivory: #F5F5F3;
-  --color-brand-slate: #2A2D34;
-  --color-brand-accent: #C5A059; /* Subtle gold accent */
+  --color-brand-accent: #C6A96B; /* Muted Gold from image */
+  --color-brand-border: rgba(245, 245, 243, 0.05);
   
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2.5rem;
 }
 
 @layer base {
   body {
-    @apply bg-brand-charcoal text-brand-ivory font-sans antialiased;
+    @apply bg-brand-charcoal text-brand-ivory font-sans antialiased selection:bg-brand-accent/30;
   }
 }
 
 .glass-card {
-  @apply bg-brand-slate/40 backdrop-blur-md border border-brand-ivory/10;
+  @apply bg-brand-slate/60 backdrop-blur-xl border border-brand-border shadow-2xl;
+}
+
+.sidebar-item-active {
+  @apply bg-brand-accent/10 text-brand-accent border-r-2 border-brand-accent;
 }
 
 .premium-gradient {

@@ -1,40 +1,43 @@
 import { motion } from 'motion/react';
+import { Sparkles } from 'lucide-react';
 
 export default function Preloader() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-charcoal">
-      <div className="relative flex flex-col items-center">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="w-16 h-16 border-t-2 border-brand-accent rounded-full mb-8"
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-brand-charcoal overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        className="relative"
+      >
+        <div className="w-24 h-24 rounded-[2rem] bg-brand-accent flex items-center justify-center shadow-[0_0_50px_rgba(198,169,107,0.3)]">
+           <Sparkles className="w-12 h-12 text-brand-charcoal" />
+        </div>
+        <motion.div 
+          className="absolute -inset-4 rounded-[2.5rem] border border-brand-accent/20"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1.1 }}
+          transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
         />
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="flex flex-col items-center"
-        >
-          <span className="font-display text-4xl font-bold tracking-tighter text-brand-ivory">
-            VELTRIX
-          </span>
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: '100%' }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="h-[1px] bg-brand-accent mt-2" 
-          />
-          <span className="text-brand-ivory/40 text-[10px] uppercase tracking-[0.2em] mt-4">
-            Intelligence Platform
-          </span>
-        </motion.div>
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.8 }}
+        className="mt-10 text-center"
+      >
+        <h1 className="font-display text-2xl font-bold uppercase tracking-[0.3em] text-brand-ivory/80">Veltrix</h1>
+        <p className="text-[10px] uppercase font-bold tracking-widest text-brand-ivory/20 mt-2">AI Consciousness for Capital</p>
+      </motion.div>
+
+      <div className="absolute bottom-12 w-48 h-[2px] bg-brand-ivory/5 overflow-hidden rounded-full">
+         <motion.div 
+            className="h-full bg-brand-accent"
+            initial={{ x: "-100%" }}
+            animate={{ x: "0%" }}
+            transition={{ duration: 2, ease: "easeInOut" }}
+         />
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import ChatInterface from '../chat/ChatInterface';
 import InsightsGrid from './InsightsGrid';
 import Navbar from '../layout/Navbar';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, MessageSquare, History, Settings, LogOut, Sparkles, CreditCard } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, History, Settings, LogOut, Sparkles, CreditCard, PieChart, Bell, Target, ChevronRight } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { generateWeeklyInsight } from '../../services/aiService';
 import SettingsModal from './SettingsModal';
@@ -40,7 +40,11 @@ export default function Dashboard({ user }: { user: User }) {
 
   useEffect(() => {
     const expensesPath = `users/${user.uid}/expenses`;
-    const qExpenses = query(collection(db, expensesPath), orderBy('timestamp', 'desc'));
+    const qExpenses = query(
+      collection(db, expensesPath), 
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc')
+    );
     
     const unsubExpenses = onSnapshot(qExpenses, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Expense));
@@ -48,7 +52,11 @@ export default function Dashboard({ user }: { user: User }) {
     }, (error) => handleFirestoreError(error, OperationType.LIST, expensesPath));
 
     const insightsPath = `users/${user.uid}/insights`;
-    const qInsights = query(collection(db, insightsPath), orderBy('timestamp', 'desc'));
+    const qInsights = query(
+      collection(db, insightsPath), 
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc')
+    );
 
     const unsubInsights = onSnapshot(qInsights, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Insight));
@@ -73,25 +81,31 @@ export default function Dashboard({ user }: { user: User }) {
       <Navbar user={user} />
       
       <main className="flex-1 overflow-hidden relative flex flex-col md:flex-row">
-        {/* Desktop Sidebar */}
-        <nav className="hidden md:flex flex-col w-64 border-r border-brand-ivory/5 p-6 gap-2">
-          <NavItem 
-            active={activeTab === 'chat'} 
-            onClick={() => setActiveTab('chat')} 
-            icon={<MessageSquare className="w-5 h-5" />} 
-            label="Intelligent Chat" 
-          />
+        <nav className="hidden md:flex flex-col w-72 border-r border-brand-ivory/5 p-6 space-y-2">
+          <div className="mb-8 flex items-center gap-3 px-2">
+             <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-brand-charcoal" />
+             </div>
+             <span className="font-display font-bold text-xl tracking-tight uppercase">Veltrix</span>
+          </div>
+
           <NavItem 
             active={activeTab === 'dashboard'} 
             onClick={() => setActiveTab('dashboard')} 
             icon={<LayoutDashboard className="w-5 h-5" />} 
-            label="Insights Grid" 
+            label="Dashboard" 
+          />
+          <NavItem 
+            active={activeTab === 'chat'} 
+            onClick={() => setActiveTab('chat')} 
+            icon={<MessageSquare className="w-5 h-5" />} 
+            label="Veltrix AI" 
           />
           <NavItem 
             active={activeTab === 'history'} 
             onClick={() => setActiveTab('history')} 
             icon={<History className="w-5 h-5" />} 
-            label="Log History" 
+            label="Transactions" 
           />
           <NavItem 
             active={activeTab === 'subs'} 
@@ -99,21 +113,48 @@ export default function Dashboard({ user }: { user: User }) {
             icon={<CreditCard className="w-5 h-5" />} 
             label="Subscriptions" 
           />
-          <div className="mt-auto pt-6 border-t border-brand-ivory/5 space-y-2">
-            <button 
+          <NavItem 
+            active={false} 
+            onClick={() => toast.info("Coming soon")} 
+            icon={<PieChart className="w-5 h-5" />} 
+            label="Budgets" 
+          />
+           <NavItem 
+            active={false} 
+            onClick={() => toast.info("Coming soon")} 
+            icon={<Bell className="w-5 h-5" />} 
+            label="Alerts" 
+          />
+          <NavItem 
+            active={false} 
+            onClick={() => toast.info("Coming soon")} 
+            icon={<Target className="w-5 h-5" />} 
+            label="Goals" 
+          />
+          <NavItem 
+            active={isSettingsOpen} 
+            onClick={() => setIsSettingsOpen(true)} 
+            icon={<Settings className="w-5 h-5" />} 
+            label="Settings" 
+          />
+
+          <div className="mt-auto pt-6 border-t border-brand-ivory/5">
+            <div 
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-3 w-full p-3 rounded-xl text-brand-ivory/40 hover:text-brand-ivory hover:bg-brand-slate/50 transition-all"
+              className="flex items-center gap-3 p-3 rounded-2xl bg-brand-slate/50 hover:bg-brand-slate transition-all cursor-pointer group"
             >
-              <Settings className="w-5 h-5" />
-              Settings
-            </button>
-            <button 
-              onClick={() => auth.signOut()}
-              className="flex items-center gap-3 w-full p-3 rounded-xl text-red-400/60 hover:text-red-400 hover:bg-red-400/5 transition-all"
-            >
-              <LogOut className="w-5 h-5" />
-              Logout
-            </button>
+              <img 
+                src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} 
+                alt="Profile" 
+                className="w-10 h-10 rounded-xl grayscale group-hover:grayscale-0 transition-all"
+                referrerPolicy="no-referrer"
+              />
+              <div className="flex-1 overflow-hidden">
+                <div className="text-xs font-bold truncate">{user.displayName || 'Prakhar Verma'}</div>
+                <div className="text-[10px] text-brand-accent font-bold uppercase tracking-tighter">Premium Plan</div>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-20 group-hover:opacity-100 transition-opacity" />
+            </div>
           </div>
         </nav>
 
@@ -171,7 +212,6 @@ export default function Dashboard({ user }: { user: User }) {
       {/* Support and Modals */}
       <SupportBot />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
-      <Toaster richColors position="top-right" theme="dark" />
 
       {/* Mobile Navigation */}
       <nav className="md:hidden flex h-20 items-center justify-around border-t border-brand-ivory/5 bg-brand-charcoal px-6 pb-2">

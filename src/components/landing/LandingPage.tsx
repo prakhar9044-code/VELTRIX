@@ -3,13 +3,9 @@ import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../../lib/firebase';
 import { ChevronRight, CreditCard, PieChart, Sparkles, Zap, Shield, HelpCircle, CheckCircle } from 'lucide-react';
 
-export default function LandingPage() {
-  const handleLogin = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
+export default function LandingPage({ onShowAuth }: { onShowAuth: () => void }) {
+  const handleLogin = () => {
+    onShowAuth();
   };
 
   return (
@@ -53,17 +49,89 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button 
                 onClick={handleLogin}
-                className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-brand-ivory text-brand-charcoal font-bold text-lg hover:shadow-[0_0_40px_rgba(245,245,243,0.3)] transition-all flex items-center justify-center gap-2 group"
+                className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-brand-accent text-brand-charcoal font-bold text-lg hover:shadow-[0_0_40px_rgba(198,169,107,0.3)] transition-all flex items-center justify-center gap-2 group"
               >
-                Secure Access
+                Start Tracking
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <div className="text-xs text-brand-ivory/20 flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Bank-grade encryption
+              <button className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-brand-slate text-brand-ivory font-bold text-lg hover:bg-brand-slate/80 transition-all">
+                View Demo
+              </button>
+            </div>
+
+            <div className="mt-12 flex items-center justify-center gap-4">
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <img 
+                    key={i}
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`}
+                    alt="User"
+                    className="w-10 h-10 rounded-full border-2 border-brand-charcoal grayscale"
+                  />
+                ))}
+              </div>
+              <div className="text-left">
+                <div className="flex gap-1 text-brand-accent">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Sparkles key={i} className="w-3 h-3 fill-current" />
+                  ))}
+                </div>
+                <p className="text-xs text-brand-ivory/40">Trusted by <span className="text-brand-ivory font-bold">20,000+ users</span></p>
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Quick Feature Grid */}
+      <section className="px-6 mb-32">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FeatureBadge 
+            icon={<Zap className="w-5 h-5 text-brand-accent" />}
+            title="Chat-Based Tracking"
+            desc="Log expenses in natural language via AI."
+          />
+          <FeatureBadge 
+            icon={<Sparkles className="w-5 h-5 text-brand-accent" />}
+            title="AI Insights"
+            desc="Smart insights about your spending habits."
+          />
+          <FeatureBadge 
+            icon={<Shield className="w-5 h-5 text-brand-accent" />}
+            title="Leak Detection"
+            desc="Find hidden leaks and save more money."
+          />
+        </div>
+      </section>
+
+      {/* Powered by AI Agents Section */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="font-display text-4xl md:text-5xl font-bold mb-4 tracking-tight">Powered by AI Agents</h2>
+          <p className="text-brand-ivory/40 mb-16 max-w-xl mx-auto">Veltrix is a team of specialized AI agents working together to optimize your financial intelligence.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
+            <AgentCard 
+              name="V-Parse" 
+              desc="Understands your messages and extracts expenses with 99.9% accuracy." 
+              icon={<Zap className="w-6 h-6 text-brand-accent" />} 
+            />
+            <AgentCard 
+              name="V-Insight" 
+              desc="Analyzes patterns and generates powerful behavioral insights." 
+              icon={<Sparkles className="w-6 h-6 text-brand-accent" />} 
+            />
+            <AgentCard 
+              name="V-Guard" 
+              desc="Detects leaks, ghost subscriptions, and unnecessary spending." 
+              icon={<Shield className="w-6 h-6 text-brand-accent" />} 
+            />
+            <AgentCard 
+              name="V-Coach" 
+              desc="Guides you with smart nudges to build better capital discipline." 
+              icon={<HelpCircle className="w-6 h-6 text-brand-accent" />} 
+            />
+          </div>
         </div>
       </section>
 
@@ -101,32 +169,44 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing / Access Section */}
+      {/* Pricing Section */}
       <section className="py-40 px-6">
         <div className="max-w-7xl mx-auto text-center">
-            <h2 className="font-display text-5xl font-bold mb-16 tracking-tight">Uncompromising Privacy. <br /> Straightforward Pricing.</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div className="p-10 rounded-[2.5rem] glass-card text-left">
-                    <div className="text-brand-accent font-bold uppercase tracking-widest text-xs mb-4">Veltrix Core</div>
-                    <div className="text-4xl font-bold mb-6">Free</div>
-                    <ul className="space-y-4 text-brand-ivory/60 mb-10">
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-accent" /> Unlimited Chat Logs</li>
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-accent" /> Basic Monthly Insights</li>
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-accent" /> PWA Mobile App</li>
-                    </ul>
-                    <button onClick={handleLogin} className="w-full py-4 rounded-xl border border-brand-ivory/10 hover:bg-brand-ivory hover:text-brand-charcoal transition-all font-bold">Start Free</button>
-                </div>
-                <div className="p-10 rounded-[2.5rem] bg-brand-accent text-brand-charcoal text-left relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform"><Sparkles className="w-20 h-20" /></div>
-                    <div className="text-brand-charcoal/60 font-bold uppercase tracking-widest text-xs mb-4">Veltrix Platinum</div>
-                    <div className="text-4xl font-bold mb-6">Invites Only</div>
-                    <ul className="space-y-4 text-brand-charcoal/80 mb-10">
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-charcoal" /> Multi-user Budgets</li>
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-charcoal" /> Advanced Coaching Agent</li>
-                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-charcoal" /> Bank API Connectivity</li>
-                    </ul>
-                    <button className="w-full py-4 rounded-xl bg-brand-charcoal text-brand-ivory font-bold opacity-30 cursor-not-allowed">Join Waitlist</button>
-                </div>
+            <h2 className="font-display text-6xl font-bold mb-4 tracking-tighter uppercase">Scale with Veltrix</h2>
+            <p className="text-brand-ivory/40 text-lg mb-12">Precise intelligence for every stage of capital.</p>
+            
+            <div className="flex items-center justify-center gap-4 mb-20">
+               <span className="text-sm font-bold text-brand-ivory/40">Monthly</span>
+               <div className="w-12 h-6 rounded-full bg-brand-slate relative p-1 cursor-pointer">
+                  <div className="w-4 h-4 rounded-full bg-brand-accent absolute left-1" />
+               </div>
+               <span className="text-sm font-bold text-brand-ivory/80">Yearly</span>
+               <span className="bg-brand-accent/20 text-brand-accent text-[10px] font-bold px-3 py-1 rounded-full uppercase ml-2">2 Months Free</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+               <PricingCard 
+                  tier="Basic" 
+                  price="0" 
+                  desc="Perfect for individuals tracking daily micro-expenses." 
+                  features={["Unlimited Expense Logs", "Daily Money Score", "Basic Weekly Analytics"]}
+                  onSelect={handleLogin}
+               />
+               <PricingCard 
+                  tier="Pro" 
+                  price="49" 
+                  popular 
+                  desc="Advanced insights for serious financial optimization." 
+                  features={["AI Behavioral Coaching", "Subscription Pulse", "Smart Impulse Alerts", "Custom Categories"]}
+                  onSelect={handleLogin}
+               />
+               <PricingCard 
+                  tier="Business" 
+                  price="199" 
+                  desc="Team-wide consciousness for group expenditure." 
+                  features={["Multi-user Spaces", "Shared Budgets", "Advanced Data Export", "API Access"]}
+                  onSelect={handleLogin}
+               />
             </div>
         </div>
       </section>
@@ -234,6 +314,60 @@ function Message({ type, text, delay }: { type: 'user' | 'ai', text: string, del
         {text}
       </div>
     </motion.div>
+  );
+}
+
+function PricingCard({ tier, price, desc, features, popular, onSelect }: { tier: string, price: string, desc: string, features: string[], popular?: boolean, onSelect: () => void }) {
+  return (
+    <div className={`p-10 rounded-[3rem] border transition-all ${popular ? 'bg-brand-accent text-brand-charcoal border-brand-accent shadow-[0_20px_50px_rgba(198,169,107,0.15)] scale-105 z-10' : 'glass-card border-brand-ivory/5 hover:border-brand-accent/20'}`}>
+      <div className="flex justify-between items-start mb-4">
+         <div className={`text-[10px] font-bold uppercase tracking-widest ${popular ? 'text-brand-charcoal/60' : 'text-brand-accent'}`}>{tier}</div>
+         {popular && <div className="text-[8px] font-bold uppercase tracking-widest bg-brand-charcoal text-brand-accent px-2 py-1 rounded-md">Most Popular</div>}
+      </div>
+      <div className="flex items-baseline gap-1 mb-6">
+         <span className="text-4xl font-display font-bold">₹{price}</span>
+         <span className={`text-xs font-bold ${popular ? 'text-brand-charcoal/40' : 'text-brand-ivory/40'}`}>/MO</span>
+      </div>
+      <p className={`text-sm mb-10 leading-relaxed font-medium ${popular ? 'text-brand-charcoal/60' : 'text-brand-ivory/40'}`}>{desc}</p>
+      <ul className="space-y-4 mb-12">
+        {features.map((f, i) => (
+          <li key={i} className="flex items-center gap-3 text-xs font-bold">
+            <CheckCircle className={`w-4 h-4 ${popular ? 'text-brand-charcoal' : 'text-brand-accent'}`} />
+            <span className={popular ? 'text-brand-charcoal/80' : 'text-brand-ivory/70'}>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <button 
+        onClick={onSelect}
+        className={`w-full py-4 rounded-2xl font-bold text-sm transition-all ${popular ? 'bg-brand-charcoal text-white hover:opacity-90' : 'border border-brand-ivory/10 hover:bg-brand-ivory hover:text-brand-charcoal'}`}
+      >
+        Get Started
+      </button>
+    </div>
+  );
+}
+
+function FeatureBadge({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+  return (
+    <div className="p-8 rounded-3xl glass-card border-brand-ivory/5 group hover:border-brand-accent/20 transition-all">
+      <div className="w-12 h-12 rounded-2xl bg-brand-charcoal flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+        {icon}
+      </div>
+      <h4 className="text-lg font-bold mb-2">{title}</h4>
+      <p className="text-sm text-brand-ivory/40 leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function AgentCard({ name, desc, icon }: { name: string, desc: string, icon: React.ReactNode }) {
+  return (
+    <div className="p-8 rounded-[2.5rem] bg-brand-slate/30 border border-brand-ivory/5 hover:border-brand-accent/20 transition-all group">
+      <div className="w-12 h-12 rounded-2xl bg-brand-accent/10 flex items-center justify-center mb-6">
+        {icon}
+      </div>
+      <h4 className="text-xl font-display font-bold mb-2 group-hover:text-brand-accent transition-colors">{name}</h4>
+      <p className="text-sm text-brand-ivory/40 leading-relaxed">{desc}</p>
+    </div>
   );
 }
 

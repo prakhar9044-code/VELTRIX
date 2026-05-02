@@ -1,19 +1,19 @@
 {
-  "name": "Veltrix Intelligence",
+  "name": "Veltrix",
   "short_name": "Veltrix",
-  "description": "Premium AI-powered micro-expense intelligence platform.",
-  "start_url": "/",
+  "description": "AI-powered micro-expense intelligence.",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#0F1115",
-  "theme_color": "#C5A059",
+  "theme_color": "#C6A96B",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968260.png",
+      "src": "https://api.dicebear.com/7.x/shapes/svg?seed=veltrix&backgroundColor=c6a96b",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968260.png",
+      "src": "https://api.dicebear.com/7.x/shapes/svg?seed=veltrix&backgroundColor=c6a96b",
       "sizes": "512x512",
       "type": "image/png"
     }

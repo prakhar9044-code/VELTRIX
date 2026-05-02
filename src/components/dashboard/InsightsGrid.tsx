@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Expense, Insight } from '../../types';
 import { motion } from 'motion/react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area } from 'recharts';
 import { Sparkles, AlertTriangle, ArrowUpRight } from 'lucide-react';
 import { getDailyScore, getPredictions, getAlerts, DailyScore, Prediction, Alert } from '../../services/api';
 import DailyScoreGauge from './DailyScoreGauge';
@@ -33,17 +33,28 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
-      {/* Daily Money Score Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="col-span-full md:col-span-1 p-8 rounded-[2.5rem] premium-gradient border border-brand-ivory/5 flex flex-col items-center justify-center min-h-[350px]"
+        className="col-span-full md:col-span-1 p-8 rounded-[2.5rem] premium-gradient border border-brand-ivory/5 flex flex-col justify-between min-h-[350px]"
       >
-        <div className="w-full mb-4 flex justify-between items-start">
-           <span className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/30">Intelligence Index</span>
-           <ArrowUpRight className="w-4 h-4 text-brand-accent" />
+        <div className="w-full flex justify-between items-start">
+           <span className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/30">Total Outflow</span>
+           <div className="flex items-center gap-1 text-[10px] text-brand-accent font-bold">
+              <ArrowUpRight className="w-3 h-3" /> 18% vs last week
+           </div>
         </div>
-        {dailyScore ? <DailyScoreGauge score={dailyScore.score} /> : <div className="animate-pulse w-32 h-32 rounded-full bg-brand-slate" />}
+        <div className="py-6">
+           <div className="text-brand-ivory/40 text-[10px] font-bold uppercase tracking-widest mb-1">Weekly Spend</div>
+           <div className="text-6xl font-display font-bold">₹{expenses.reduce((s, e) => s + e.amount, 0).toLocaleString()}</div>
+        </div>
+        <div className="h-24 w-full">
+           <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={expenses.slice(0, 7)}>
+                 <Area type="monotone" dataKey="amount" stroke="#C6A96B" fill="#C6A96B10" strokeWidth={2} />
+              </AreaChart>
+           </ResponsiveContainer>
+        </div>
       </motion.div>
 
       {/* Smart Predictions Card */}
@@ -67,36 +78,27 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="p-8 rounded-[2.5rem] glass-card flex flex-col items-center justify-center min-h-[300px]"
+        className="col-span-full md:col-span-1 p-8 rounded-[2.5rem] glass-card border border-brand-ivory/5 flex flex-col justify-between min-h-[350px]"
       >
-        <h3 className="text-xs font-bold text-brand-ivory/60 uppercase tracking-widest mb-6 w-full text-left">Capital Allocation</h3>
-        <div className="w-full h-full min-h-[200px]">
-          {categoryStats.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryStats}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {categoryStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0F1115', border: 'none', borderRadius: '12px' }}
-                  itemStyle={{ color: '#F5F5F3', fontSize: '12px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-full flex items-center justify-center text-brand-ivory/20 text-xs italic">Awaiting data...</div>
-          )}
+        <div className="flex flex-col h-full justify-between">
+           <div>
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40 mb-6 px-2">Category Pulse</h3>
+              <div className="space-y-4">
+                 <CategoryItem label="Dining" percent={43} color="#C6A96B" />
+                 <CategoryItem label="Transport" percent={23} color="#2A2D34" />
+                 <CategoryItem label="Shopping" percent={19} color="#F5F5F3" />
+                 <CategoryItem label="Wellness" percent={9} color="#1A1D24" />
+              </div>
+           </div>
+           
+           <div className="pt-6 border-t border-brand-ivory/5 flex gap-4 items-center">
+              <div className="p-2 rounded-lg bg-brand-accent/10">
+                 <Sparkles className="w-4 h-4 text-brand-accent" />
+              </div>
+              <p className="text-[10px] text-brand-ivory/40 leading-relaxed font-medium">
+                 You spent <span className="text-brand-ivory font-bold">₹2,410</span> on Dining this week. That's <span className="text-red-400">12% more</span> than your baseline.
+              </p>
+           </div>
         </div>
       </motion.div>
 
@@ -126,6 +128,19 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
           </p>
         </InsightCard>
       </div>
+    </div>
+  );
+}
+
+function CategoryItem({ label, percent, color }: { label: string, percent: number, color: string }) {
+  return (
+    <div className="flex items-center justify-between group cursor-default">
+      <div className="flex items-center gap-3 flex-1">
+        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
+        <span className="text-xs font-medium text-brand-ivory/60 group-hover:text-brand-ivory transition-colors">{label}</span>
+        <div className="flex-1 h-[1px] bg-brand-ivory/5 mx-4" />
+      </div>
+      <div className="text-[10px] font-bold text-brand-ivory/80 group-hover:text-brand-accent transition-colors">{percent}%</div>
     </div>
   );
 }
