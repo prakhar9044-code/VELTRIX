@@ -1,20 +1,36 @@
 import { motion } from 'motion/react';
-import { Target, TrendingUp, Plus, ArrowRight } from 'lucide-react';
-import { Expense } from '../../types';
+import { Target, TrendingUp, Plus, ArrowRight, X } from 'lucide-react';
+import { Expense, Budget } from '../../types';
+import { useState } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { toast } from 'sonner';
 
-interface Budget {
-  category: string;
-  limit: number;
-  spent: number;
-}
+export default function BudgetsView({ user, expenses, budgets }: { user: any, expenses: Expense[], budgets: Budget[] }) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [newBudget, setNewBudget] = useState({ category: 'Food', limit: 5000 });
 
-export default function BudgetsView({ expenses }: { expenses: Expense[] }) {
-  const budgets: Budget[] = [
-    { category: 'Dining', limit: 8000, spent: expenses.filter(e => e.category === 'Dining').reduce((acc, e) => acc + e.amount, 0) },
-    { category: 'Transport', limit: 3000, spent: expenses.filter(e => e.category === 'Transport').reduce((acc, e) => acc + e.amount, 0) },
-    { category: 'Entertainment', limit: 5000, spent: expenses.filter(e => e.category === 'Entertainment').reduce((acc, e) => acc + e.amount, 0) },
-    { category: 'Shopping', limit: 10000, spent: expenses.filter(e => e.category === 'Shopping').reduce((acc, e) => acc + e.amount, 0) },
-  ];
+  const categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Health', 'Others'];
+
+  const handleCreate = async () => {
+    try {
+      await addDoc(collection(db, `users/${user.uid}/budgets`), {
+        userId: user.uid,
+        ...newBudget,
+        spent: 0,
+        period: 'monthly'
+      });
+      setIsAdding(false);
+      toast.success("Budget set successfully");
+    } catch (e) {
+      toast.error("Failed to set budget");
+    }
+  };
+
+  const activeBudgets = budgets.map(b => ({
+    ...b,
+    spent: expenses.filter(e => e.category === b.category).reduce((acc, e) => acc + e.amount, 0)
+  }));
 
   return (
     <div className="space-y-10 pb-20">
@@ -23,16 +39,50 @@ export default function BudgetsView({ expenses }: { expenses: Expense[] }) {
           <h2 className="font-display text-4xl font-bold mb-2">Budgeting</h2>
           <p className="text-brand-ivory/30 text-sm">Synchronized limits for conscious allocation.</p>
         </div>
-        <button className="p-4 rounded-2xl bg-brand-accent text-brand-charcoal font-bold flex items-center gap-2 hover:scale-105 transition-all">
+        <button 
+          onClick={() => setIsAdding(true)}
+          className="p-4 rounded-2xl bg-brand-accent text-brand-charcoal font-bold flex items-center gap-2 hover:scale-105 transition-all"
+        >
           <Plus className="w-5 h-5" />
           Set New Limit
         </button>
       </div>
 
+      {isAdding && (
+        <div className="glass-card p-8 rounded-3xl border border-brand-accent/30 animate-in fade-in slide-in-from-top-4">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-bold text-xl uppercase tracking-tighter">Define Allocation</h3>
+            <button onClick={() => setIsAdding(false)}><X className="w-5 h-5 opacity-40" /></button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="text-[10px] font-bold uppercase opacity-30 block mb-2">Category</label>
+              <select 
+                value={newBudget.category}
+                onChange={e => setNewBudget({...newBudget, category: e.target.value})}
+                className="w-full bg-brand-slate border border-brand-ivory/10 rounded-xl p-3 outline-none focus:border-brand-accent/50"
+              >
+                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold uppercase opacity-30 block mb-2">Limit (Monthly)</label>
+              <input 
+                type="number"
+                value={newBudget.limit}
+                onChange={e => setNewBudget({...newBudget, limit: parseInt(e.target.value)})}
+                className="w-full bg-brand-slate border border-brand-ivory/10 rounded-xl p-3 outline-none focus:border-brand-accent/50"
+              />
+            </div>
+          </div>
+          <button onClick={handleCreate} className="w-full py-4 bg-brand-ivory text-brand-charcoal font-bold rounded-xl hover:bg-brand-accent transition-colors">Create Budget</button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {budgets.map((budget, i) => (
+        {activeBudgets.length > 0 ? activeBudgets.map((budget, i) => (
           <motion.div
-            key={budget.category}
+            key={budget.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
@@ -65,13 +115,13 @@ export default function BudgetsView({ expenses }: { expenses: Expense[] }) {
                 </span>
               </div>
             </div>
-
-            <div className="mt-8 pt-6 border-t border-brand-ivory/5 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-               <span className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/20">Adjustment Required?</span>
-               <ArrowRight className="w-4 h-4 text-brand-accent" />
-            </div>
           </motion.div>
-        ))}
+        )) : (
+          <div className="col-span-full py-20 text-center glass-card rounded-[2.5rem] border-2 border-dashed border-brand-ivory/5">
+             <Target className="w-12 h-12 text-brand-ivory/10 mx-auto mb-4" />
+             <p className="text-brand-ivory/40 font-medium font-display italic">No active limits. Define your first target above.</p>
+          </div>
+        )}
       </div>
 
       <div className="p-10 rounded-[2.5rem] premium-gradient border border-brand-ivory/5">
@@ -81,9 +131,8 @@ export default function BudgetsView({ expenses }: { expenses: Expense[] }) {
           </div>
           <div className="flex-1 text-center md:text-left">
             <h4 className="text-2xl font-display font-bold mb-2">Smart Optimization</h4>
-            <p className="text-brand-ivory/60 text-sm max-w-xl">Veltrix has detected you can increase your "Wellness" budget by 15% by reducing "Dining" frequency without impacting your lifestyle.</p>
+            <p className="text-brand-ivory/60 text-sm max-w-xl">Veltrix is analyzing your spend stream. Once data matures, smart suggestions for limit adjustments will appear here.</p>
           </div>
-          <button className="px-8 py-4 rounded-xl border border-brand-ivory/20 hover:bg-brand-ivory hover:text-brand-charcoal transition-all font-bold">Apply Suggestions</button>
         </div>
       </div>
     </div>

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { User } from 'firebase/auth';
+import { Insight } from '../../types';
 import { Sparkles, Bell, User as UserIcon, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import NotificationsModal from './NotificationsModal';
 
-export default function Navbar({ user }: { user: User }) {
+export default function Navbar({ user, insights }: { user: User, insights: Insight[] }) {
   const [isNotifsOpen, setIsNotifsOpen] = useState(false);
 
   return (
@@ -49,7 +50,7 @@ export default function Navbar({ user }: { user: User }) {
         </div>
       </div>
 
-      <NotificationsModal isOpen={isNotifsOpen} onClose={() => setIsNotifsOpen(false)} />
+      <NotificationsModal isOpen={isNotifsOpen} onClose={() => setIsNotifsOpen(false)} insights={insights} />
     </header>
   );
 }

@@ -23,13 +23,22 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
 
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
+    const total = expenses.reduce((s, e) => s + e.amount, 0);
+    
     expenses.forEach(e => {
       stats[e.category] = (stats[e.category] || 0) + e.amount;
     });
-    return Object.entries(stats).map(([name, value]) => ({ name, value }));
+
+    return Object.entries(stats)
+      .map(([name, value]) => ({ 
+        name, 
+        value, 
+        percent: total > 0 ? Math.round((value / total) * 100) : 0 
+      }))
+      .sort((a, b) => b.value - a.value);
   }, [expenses]);
 
-  const COLORS = ['#C5A059', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+  const COLORS = ['#C6A96B', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
@@ -41,16 +50,16 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
         <div className="w-full flex justify-between items-start">
            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/30">Total Outflow</span>
            <div className="flex items-center gap-1 text-[10px] text-brand-accent font-bold">
-              <ArrowUpRight className="w-3 h-3" /> 18% vs last week
+              <ArrowUpRight className="w-3 h-3" /> Real-time tracking
            </div>
         </div>
         <div className="py-6">
-           <div className="text-brand-ivory/40 text-[10px] font-bold uppercase tracking-widest mb-1">Weekly Spend</div>
+           <div className="text-brand-ivory/40 text-[10px] font-bold uppercase tracking-widest mb-1">Total Portfolio Spend</div>
            <div className="text-6xl font-display font-bold">₹{expenses.reduce((s, e) => s + e.amount, 0).toLocaleString()}</div>
         </div>
-        <div className="h-24 w-full">
+        <div className="h-24 w-full opacity-50">
            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={expenses.slice(0, 7)}>
+              <AreaChart data={expenses.slice(-10).reverse()}>
                  <Area type="monotone" dataKey="amount" stroke="#C6A96B" fill="#C6A96B10" strokeWidth={2} />
               </AreaChart>
            </ResponsiveContainer>
@@ -59,7 +68,11 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
 
       {/* Smart Predictions Card */}
       <div className="col-span-full md:col-span-1 lg:col-span-1">
-         {prediction && <PredictionsCard prediction={prediction} mockData={expenses.slice(0, 7)} />}
+         {prediction ? <PredictionsCard prediction={prediction} mockData={expenses.slice(0, 7)} /> : (
+           <div className="p-8 rounded-[2.5rem] glass-card border border-brand-ivory/5 flex items-center justify-center h-full opacity-40 italic text-xs">
+             Analyzing your velocity...
+           </div>
+         )}
       </div>
 
       {/* Regret / Pulse Alerts */}
@@ -84,10 +97,13 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
            <div>
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40 mb-6 px-2">Category Pulse</h3>
               <div className="space-y-4">
-                 <CategoryItem label="Dining" percent={43} color="#C6A96B" />
-                 <CategoryItem label="Transport" percent={23} color="#2A2D34" />
-                 <CategoryItem label="Shopping" percent={19} color="#F5F5F3" />
-                 <CategoryItem label="Wellness" percent={9} color="#1A1D24" />
+                 {categoryStats.length > 0 ? (
+                   categoryStats.slice(0, 5).map((stat, idx) => (
+                     <CategoryItem key={stat.name} label={stat.name} percent={stat.percent} color={COLORS[idx % COLORS.length]} />
+                   ))
+                 ) : (
+                   <div className="text-xs text-brand-ivory/20 italic py-10">Waiting for data stream...</div>
+                 )}
               </div>
            </div>
            
@@ -96,7 +112,7 @@ export default function InsightsGrid({ user, expenses, insights }: { user: any, 
                  <Sparkles className="w-4 h-4 text-brand-accent" />
               </div>
               <p className="text-[10px] text-brand-ivory/40 leading-relaxed font-medium">
-                 You spent <span className="text-brand-ivory font-bold">₹2,410</span> on Dining this week. That's <span className="text-red-400">12% more</span> than your baseline.
+                 Veltrix is learning your habits. Add more entries via AI chat to refine intelligence.
               </p>
            </div>
         </div>

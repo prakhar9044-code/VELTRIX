@@ -1,9 +1,33 @@
+import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { CreditCard, AlertTriangle, CheckCircle, Coffee, UtensilsCrossed, ShoppingBag } from 'lucide-react';
 import { Expense } from '../../types';
 
 export default function SubscriptionDetector({ expenses }: { expenses: Expense[] }) {
-  const recurringTotal = 1759;
+  // Logic to find recurring expenses (same description and roughly same amount)
+  const recurring = useMemo(() => {
+    const counts: Record<string, { count: number, total: number, lastAmount: number }> = {};
+    expenses.forEach(e => {
+      const key = e.description.toLowerCase();
+      if (!counts[key]) {
+        counts[key] = { count: 0, total: 0, lastAmount: e.amount };
+      }
+      counts[key].count += 1;
+      counts[key].total += e.amount;
+    });
+
+    return Object.entries(counts)
+      .filter(([_, stats]) => stats.count >= 2)
+      .map(([name, stats]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        count: stats.count,
+        total: stats.total,
+        lastAmount: stats.lastAmount
+      }))
+      .sort((a, b) => b.total - a.total);
+  }, [expenses]);
+
+  const recurringTotal = recurring.reduce((acc, curr) => acc + curr.lastAmount, 0);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -13,43 +37,54 @@ export default function SubscriptionDetector({ expenses }: { expenses: Expense[]
            <p className="text-brand-ivory/30 text-sm">Identifying recurring patterns and capital erosion.</p>
         </div>
 
-        {/* Repeated Small Expenses */}
+        {/* Small Recurring Expenses */}
         <div className="glass-card rounded-3xl p-8">
-           <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40 mb-6">Repeated Small Expenses</h3>
-           <div className="space-y-6">
-              <LeakItem icon={<UtensilsCrossed className="w-4 h-4" />} name="Chai" count={17} total={340} />
-              <LeakItem icon={<Coffee className="w-4 h-4" />} name="Coffee" count={12} total={480} />
-              <LeakItem icon={<ShoppingBag className="w-4 h-4" />} name="Snacks" count={9} total={270} />
+           <div className="flex justify-between items-center mb-6">
+             <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40">Recurring Patterns</h3>
+             <span className="text-[10px] font-bold text-brand-accent uppercase bg-brand-accent/10 px-2 py-0.5 rounded">Real-time</span>
            </div>
-           <button className="mt-8 text-xs font-bold text-brand-accent hover:opacity-80 flex items-center gap-2">
-              View all insights →
-           </button>
+           <div className="space-y-6">
+              {recurring.length > 0 ? (
+                recurring.slice(0, 4).map(item => (
+                  <LeakItem 
+                    key={item.name} 
+                    icon={item.total > 1000 ? <CreditCard className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />} 
+                    name={item.name} 
+                    count={item.count} 
+                    total={item.total} 
+                  />
+                ))
+              ) : (
+                <div className="text-xs text-brand-ivory/20 italic py-4">No recurring patterns detected yet.</div>
+              )}
+           </div>
         </div>
 
-        {/* Subscriptions */}
+        {/* Potential Subscriptions */}
         <div className="glass-card rounded-3xl p-8">
-           <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40 mb-6">Subscription Pulse</h3>
+           <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40 mb-6">Potential Subscriptions</h3>
            <div className="space-y-6">
-              <SubscriptionItem name="Netflix" price={649} logo="N" />
-              <SubscriptionItem name="Spotify" price={119} logo="S" />
-              <SubscriptionItem name="Amazon Prime" price={149} logo="A" />
+              {recurring.filter(r => r.total > 100).length > 0 ? (
+                recurring.filter(r => r.total > 100).slice(0, 3).map(sub => (
+                  <SubscriptionItem key={sub.name} name={sub.name} price={sub.lastAmount} logo={sub.name[0]} />
+                ))
+              ) : (
+                <div className="text-xs text-brand-ivory/20 italic py-4">Add more entries to identify subscriptions.</div>
+              )}
            </div>
-           <button className="mt-8 text-xs font-bold text-brand-accent hover:opacity-80 flex items-center gap-2">
-              Manage subscriptions →
-           </button>
         </div>
       </div>
 
       <div className="flex flex-col gap-8">
         {/* Potential Saving Gauge Card */}
         <div className="glass-card rounded-3xl p-10 flex flex-col items-center justify-center text-center">
-           <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40 mb-10 w-full text-left">Potential Saving</h3>
+           <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-ivory/40 mb-10 w-full text-left">Monthly Fixed Commitments</h3>
            <div className="relative w-48 h-48 mb-6">
               <svg className="w-full h-full -rotate-90">
                  <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-brand-accent/10" />
                  <motion.circle 
                     cx="96" cy="96" r="80" stroke="#C6A96B" strokeWidth="8" fill="transparent" 
-                    strokeLinecap="round" strokeDasharray="502" initial={{ strokeDashoffset: 502 }} animate={{ strokeDashoffset: 150 }} transition={{ duration: 2 }}
+                    strokeLinecap="round" strokeDasharray="502" initial={{ strokeDashoffset: 502 }} animate={{ strokeDashoffset: recurring.length > 0 ? 150 : 502 }} transition={{ duration: 2 }}
                  />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -59,7 +94,7 @@ export default function SubscriptionDetector({ expenses }: { expenses: Expense[]
               </div>
            </div>
            <p className="text-sm text-brand-ivory/60 max-w-[200px] leading-relaxed">
-              You could save up to <span className="text-brand-accent font-bold">₹{recurringTotal}</span> by optimizing 3 low-usage subscriptions.
+              Veltrix tracks <span className="text-brand-accent font-bold">₹{recurringTotal}</span> in recurring payments detected from your stream.
            </p>
         </div>
 
@@ -70,7 +105,9 @@ export default function SubscriptionDetector({ expenses }: { expenses: Expense[]
            <div>
               <h4 className="font-bold mb-2">Efficiency Alert</h4>
               <p className="text-sm text-brand-ivory/60 leading-relaxed">
-                 We've identified a "Netflix" charge that hasn't seen app activity in 14 days. Potential waste detected.
+                 {recurring.length > 0 
+                   ? `You have ${recurring.length} recurring expenses. Reviewing these could save you up to 15% in capital leak.`
+                   : "Analyzing your spending velocity to detect leaks. Continue logging to activate alerts."}
               </p>
            </div>
         </div>

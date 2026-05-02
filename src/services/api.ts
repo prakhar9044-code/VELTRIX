@@ -1,4 +1,5 @@
 import { Expense, Insight } from '../types';
+import { calculateDailyScore, generatePredictions, getRegretAlerts } from '../lib/analytics';
 
 export interface DailyScore {
   score: number;
@@ -20,29 +21,20 @@ export interface Alert {
 }
 
 export async function getDailyScore(expenses: Expense[]): Promise<DailyScore> {
-  const res = await fetch('/api/analytics/score', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ expenses })
-  });
-  return res.json();
+  const result = calculateDailyScore(expenses);
+  return {
+    score: result.score,
+    trend: result.trend as 'up' | 'down',
+    message: result.message
+  };
 }
 
 export async function getPredictions(expenses: Expense[]): Promise<Prediction> {
-  const res = await fetch('/api/analytics/predictions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ expenses })
-  });
-  return res.json();
+  const result = generatePredictions(expenses);
+  if (!result) return { forecast: 0, risk: 'low', insight: "Gathering more data to forecast..." };
+  return result as Prediction;
 }
 
 export async function getAlerts(expenses: Expense[]): Promise<Alert[]> {
-  const res = await fetch('/api/analytics/alerts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ expenses })
-  });
-  const data = await res.json();
-  return data.alerts;
+  return getRegretAlerts(expenses);
 }

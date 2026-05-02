@@ -47,6 +47,26 @@ export interface Subscription {
   active: boolean;
 }
 
+export interface Budget {
+  id?: string;
+  userId: string;
+  category: string;
+  limit: number;
+  spent: number;
+  period: 'monthly' | 'yearly';
+}
+
+export interface Goal {
+  id?: string;
+  userId: string;
+  name: string;
+  target: number;
+  current: number;
+  deadline: string;
+  icon: string;
+  status: 'active' | 'completed';
+}
+
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',

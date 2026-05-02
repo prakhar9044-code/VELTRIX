@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { User } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError } from '../../lib/firebase';
-import { OperationType, Expense, Insight } from '../../types';
+import { OperationType, Expense, Insight, Budget, Goal } from '../../types';
 import ChatInterface from '../chat/ChatInterface';
 import InsightsGrid from './InsightsGrid';
 import Navbar from '../layout/Navbar';
@@ -21,6 +21,8 @@ import GoalsView from './GoalsView';
 export default function Dashboard({ user }: { user: User }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'history' | 'subs' | 'budgets' | 'alerts' | 'goals'>('chat');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -66,9 +68,23 @@ export default function Dashboard({ user }: { user: User }) {
       setInsights(data);
     }, (error) => handleFirestoreError(error, OperationType.LIST, insightsPath));
 
+    const budgetsPath = `users/${user.uid}/budgets`;
+    const unsubBudgets = onSnapshot(collection(db, budgetsPath), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Budget));
+      setBudgets(data);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, budgetsPath));
+
+    const goalsPath = `users/${user.uid}/goals`;
+    const unsubGoals = onSnapshot(collection(db, goalsPath), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Goal));
+      setGoals(data);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, goalsPath));
+
     return () => {
       unsubExpenses();
       unsubInsights();
+      unsubBudgets();
+      unsubGoals();
     };
   }, [user.uid]);
 
@@ -81,7 +97,7 @@ export default function Dashboard({ user }: { user: User }) {
 
   return (
     <div className="flex flex-col h-screen bg-brand-charcoal overflow-hidden">
-      <Navbar user={user} />
+      <Navbar user={user} insights={insights} />
       
       <main className="flex-1 overflow-hidden relative flex flex-col md:flex-row">
         <nav className="hidden md:flex flex-col w-72 border-r border-brand-ivory/5 p-6 space-y-2">
@@ -221,7 +237,7 @@ export default function Dashboard({ user }: { user: User }) {
                 exit={{ opacity: 0, x: -20 }}
                 className="h-full overflow-y-auto no-scrollbar"
               >
-                <BudgetsView expenses={expenses} />
+                <BudgetsView user={user} expenses={expenses} budgets={budgets} />
               </motion.div>
             )}
             {activeTab === 'alerts' && (
@@ -232,7 +248,7 @@ export default function Dashboard({ user }: { user: User }) {
                 exit={{ opacity: 0, x: -20 }}
                 className="h-full overflow-y-auto no-scrollbar"
               >
-                <AlertsView />
+                <AlertsView expenses={expenses} />
               </motion.div>
             )}
             {activeTab === 'goals' && (
@@ -243,7 +259,7 @@ export default function Dashboard({ user }: { user: User }) {
                 exit={{ opacity: 0, x: -20 }}
                 className="h-full overflow-y-auto no-scrollbar"
               >
-                <GoalsView />
+                <GoalsView user={user} goals={goals} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -255,21 +271,30 @@ export default function Dashboard({ user }: { user: User }) {
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden flex h-20 items-center justify-around border-t border-brand-ivory/5 bg-brand-charcoal px-6 pb-2">
-        <MobileNavItem 
-          active={activeTab === 'chat'} 
-          onClick={() => setActiveTab('chat')} 
-          icon={<MessageSquare className="w-6 h-6" />} 
-        />
+      <nav className="md:hidden flex h-20 items-center justify-around border-t border-brand-ivory/5 bg-brand-charcoal px-4 pb-2 z-50">
         <MobileNavItem 
           active={activeTab === 'dashboard'} 
           onClick={() => setActiveTab('dashboard')} 
-          icon={<LayoutDashboard className="w-6 h-6" />} 
+          icon={<LayoutDashboard className="w-5 h-5" />} 
+          label="Home"
         />
         <MobileNavItem 
-          active={activeTab === 'history'} 
-          onClick={() => setActiveTab('history')} 
-          icon={<History className="w-6 h-6" />} 
+          active={activeTab === 'chat'} 
+          onClick={() => setActiveTab('chat')} 
+          icon={<MessageSquare className="w-5 h-5" />} 
+          label="AI"
+        />
+        <MobileNavItem 
+          active={activeTab === 'alerts'} 
+          onClick={() => setActiveTab('alerts')} 
+          icon={<Bell className="w-5 h-5" />} 
+          label="Pulse"
+        />
+        <MobileNavItem 
+          active={isSettingsOpen} 
+          onClick={() => setIsSettingsOpen(true)} 
+          icon={<Settings className="w-5 h-5" />} 
+          label="Set"
         />
       </nav>
     </div>
@@ -292,17 +317,20 @@ function NavItem({ active, onClick, icon, label }: { active: boolean, onClick: (
   );
 }
 
-function MobileNavItem({ active, onClick, icon }: { active: boolean, onClick: () => void, icon: React.ReactNode }) {
+function MobileNavItem({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
   return (
     <button
       onClick={onClick}
-      className={`p-3 rounded-2xl transition-all ${
+      className={`flex flex-col items-center justify-center gap-1 transition-all ${
         active 
-          ? 'bg-brand-accent text-brand-charcoal scale-110 shadow-lg' 
-          : 'text-brand-ivory/40'
+          ? 'text-brand-accent' 
+          : 'text-brand-ivory/30'
       }`}
     >
-      {icon}
+      <div className={`p-2.5 rounded-xl transition-all ${active ? 'bg-brand-accent/10' : ''}`}>
+        {icon}
+      </div>
+      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
     </button>
   );
 }
