@@ -168,49 +168,49 @@ export default function ChatInterface({ user, expenses }: { user: User, expenses
   };
 
   return (
-    <div className="flex h-full bg-[#0F1115] overflow-hidden rounded-[2.5rem] border border-brand-ivory/5 shadow-2xl relative">
+    <div className="flex h-full bg-[#0F1115] overflow-hidden rounded-none md:rounded-[2.5rem] border-0 md:border border-brand-ivory/5 shadow-2xl relative">
       
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col relative bg-transparent">
+      <main className="flex-1 flex flex-col relative bg-transparent overflow-hidden">
         {/* Header */}
-        <header className="h-20 border-b border-brand-ivory/5 flex items-center justify-between px-8 bg-[#0F1115]/80 backdrop-blur-md z-10 transition-all">
-          <div className="flex items-center gap-4">
-             <div className="w-10 h-10 rounded-2xl bg-brand-accent/20 flex items-center justify-center shadow-lg shadow-brand-accent/5">
+        <header className="h-20 border-b border-brand-ivory/5 flex items-center justify-between px-4 md:px-8 bg-[#0F1115]/95 backdrop-blur-xl z-20 shrink-0">
+          <div className="flex items-center gap-3 overflow-hidden">
+             <div className="w-10 h-10 rounded-xl md:rounded-2xl bg-brand-accent/20 flex items-center justify-center shadow-lg shadow-brand-accent/5 shrink-0">
                 <Sparkles className="w-5 h-5 text-brand-accent" />
              </div>
-             <div>
-                <h2 className="text-base font-bold text-brand-ivory tracking-tight">Veltrix Intelligence</h2>
-                <div className="flex items-center gap-1.5">
-                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]" />
-                   <span className="text-[10px] font-bold uppercase text-green-500 tracking-widest">Neural Stream Active</span>
+             <div className="min-w-0">
+                <h2 className="text-sm md:text-base font-bold text-brand-ivory tracking-tight truncate leading-none mb-1">Veltrix AI</h2>
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e] shrink-0" />
+                   <span className="text-[10px] font-bold uppercase text-green-500 tracking-[0.2em] whitespace-nowrap opacity-80">Operational</span>
                 </div>
              </div>
           </div>
-          <div className="flex items-center gap-2">
-             <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-accent/10 text-brand-accent text-xs font-bold border border-brand-accent/20 hover:bg-brand-accent hover:text-brand-charcoal transition-all">
+          <div className="flex items-center gap-2 shrink-0">
+             <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-accent text-brand-charcoal text-[10px] md:text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-accent/20">
                 <Plus className="w-4 h-4" />
-                <span>New Session</span>
+                <span className="hidden sm:inline">New Session</span>
              </button>
-             <button className="p-3 rounded-xl hover:bg-brand-ivory/5 transition-all text-brand-ivory/40">
+             <button className="p-2.5 rounded-xl bg-brand-ivory/5 text-brand-ivory/40 hover:text-brand-ivory hover:bg-brand-ivory/10 transition-all">
                 <SearchIcon className="w-5 h-5" />
              </button>
           </div>
         </header>
 
         {/* Messages List */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 space-y-8 no-scrollbar scroll-smooth">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10 space-y-8 no-scrollbar scroll-smooth">
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto">
+            <div className="min-h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto py-10">
                <motion.div 
                  initial={{ scale: 0.8, opacity: 0 }}
                  animate={{ scale: 1, opacity: 1 }}
-                 className="w-20 h-20 rounded-[2rem] bg-brand-accent/10 flex items-center justify-center mb-8 relative"
+                 className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-[2rem] bg-brand-accent/10 flex items-center justify-center mb-8 relative"
                >
-                  <Sparkles className="w-10 h-10 text-brand-accent animate-pulse" />
-                  <div className="absolute inset-0 rounded-[2rem] border border-brand-accent/20 animate-ping [animation-duration:3s]" />
+                  <Sparkles className="w-8 h-8 md:w-12 md:h-12 text-brand-accent animate-pulse" />
+                  <div className="absolute inset-0 rounded-2xl md:rounded-[2rem] border border-brand-accent/20 animate-ping [animation-duration:3s]" />
                </motion.div>
-               <h1 className="text-3xl font-display font-bold text-brand-ivory mb-4 tracking-tight">How can I assist your portfolio today?</h1>
-               <p className="text-brand-ivory/40 text-sm leading-relaxed mb-10">
+               <h1 className="text-2xl md:text-4xl font-display font-bold text-brand-ivory mb-4 tracking-tight px-4 leading-[1.1] md:leading-tight">How can I assist your portfolio today?</h1>
+               <p className="text-brand-ivory/40 text-xs md:text-base leading-relaxed mb-10 md:mb-12 px-6 lg:px-12">
                  Ask me to log an expense, analyze your spending patterns, or help you track your financial ambitions in real-time.
                </p>
                
