@@ -17,6 +17,14 @@
   --radius-3xl: 2.5rem;
 }
 
+.light {
+  --color-brand-charcoal: #F5F5F3;
+  --color-brand-slate: #FFFFFF;
+  --color-brand-ivory: #0F1115;
+  --color-brand-accent: #8A764A;
+  --color-brand-border: rgba(15, 17, 21, 0.05);
+}
+
 @layer base {
   body {
     @apply bg-brand-charcoal text-brand-ivory font-sans antialiased selection:bg-brand-accent/30;

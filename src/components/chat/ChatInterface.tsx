@@ -170,75 +170,29 @@ export default function ChatInterface({ user, expenses }: { user: User, expenses
   return (
     <div className="flex h-full bg-[#0F1115] overflow-hidden rounded-[2.5rem] border border-brand-ivory/5 shadow-2xl relative">
       
-      {/* Sidebar - Desktop Only */}
-      <motion.aside 
-        initial={false}
-        animate={{ width: isSidebarOpen ? 280 : 0, opacity: isSidebarOpen ? 1 : 0 }}
-        className="hidden lg:flex flex-col border-r border-brand-ivory/5 bg-[#14171C]/50 backdrop-blur-xl shrink-0 overflow-hidden"
-      >
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center shadow-[0_0_15px_rgba(198,169,107,0.3)]">
-            <Zap className="w-5 h-5 text-brand-charcoal" />
-          </div>
-          <span className="font-display font-bold text-lg tracking-tight text-brand-ivory">Veltrix AI</span>
-        </div>
-
-        <div className="px-4 space-y-1 mb-8">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-accent text-brand-charcoal font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-accent/10 mb-4">
-            <Plus className="w-4 h-4" />
-            <span>New Chat</span>
-          </button>
-          
-          <SidebarNavItem icon={<MessageSquare className="w-4 h-4" />} label="Ask Anything" active />
-          <SidebarNavItem icon={<TrendingUp className="w-4 h-4" />} label="Insights" />
-          <SidebarNavItem icon={<PieChart className="w-4 h-4" />} label="Spending Analysis" />
-          <SidebarNavItem icon={<MessageSquare className="w-4 h-4" />} label="Budget Assistant" />
-          <SidebarNavItem icon={<Target className="w-4 h-4" />} label="Goal Planner" />
-        </div>
-
-        <div className="px-4 flex-1 overflow-y-auto no-scrollbar">
-          <h3 className="px-4 text-[10px] font-bold uppercase tracking-widest text-brand-ivory/30 mb-4">Recent Sessions</h3>
-          {recentChats.map(chat => (
-            <button key={chat.id} className="w-full flex flex-col gap-1 px-4 py-3 rounded-xl hover:bg-brand-ivory/5 transition-all text-left group">
-              <span className="text-sm text-brand-ivory/80 group-hover:text-brand-ivory transition-colors truncate">{chat.title}</span>
-              <span className="text-[10px] text-brand-ivory/30">{chat.time}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="p-6 mt-auto">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-accent/20 to-brand-slate/50 border border-brand-accent/20">
-            <div className="flex items-center gap-2 mb-2">
-              <Zap className="w-4 h-4 text-brand-accent" />
-              <span className="text-xs font-bold text-brand-ivory">Pro Plan Active</span>
-            </div>
-            <p className="text-[10px] text-brand-ivory/40 leading-relaxed">Unlock advanced multi-currency analysis and deep predictive modeling.</p>
-          </div>
-        </div>
-      </motion.aside>
-
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col relative bg-transparent">
         {/* Header */}
-        <header className="h-16 border-b border-brand-ivory/5 flex items-center justify-between px-6 bg-[#0F1115]/80 backdrop-blur-md z-10">
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-brand-accent" />
+        <header className="h-20 border-b border-brand-ivory/5 flex items-center justify-between px-8 bg-[#0F1115]/80 backdrop-blur-md z-10 transition-all">
+          <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-2xl bg-brand-accent/20 flex items-center justify-center shadow-lg shadow-brand-accent/5">
+                <Sparkles className="w-5 h-5 text-brand-accent" />
              </div>
              <div>
-                <h2 className="text-sm font-bold text-brand-ivory">Veltrix Intelligence</h2>
-                <div className="flex items-center gap-1">
-                   <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
-                   <span className="text-[9px] font-bold uppercase text-green-500 tracking-wider">Operational</span>
+                <h2 className="text-base font-bold text-brand-ivory tracking-tight">Veltrix Intelligence</h2>
+                <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]" />
+                   <span className="text-[10px] font-bold uppercase text-green-500 tracking-widest">Neural Stream Active</span>
                 </div>
              </div>
           </div>
-          <div className="flex items-center gap-4">
-             <button className="p-2 rounded-lg hover:bg-brand-ivory/5 transition-all text-brand-ivory/40">
-                <SearchIcon className="w-4 h-4" />
+          <div className="flex items-center gap-2">
+             <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-accent/10 text-brand-accent text-xs font-bold border border-brand-accent/20 hover:bg-brand-accent hover:text-brand-charcoal transition-all">
+                <Plus className="w-4 h-4" />
+                <span>New Session</span>
              </button>
-             <button className="p-2 rounded-lg hover:bg-brand-ivory/5 transition-all text-brand-ivory/40">
-                <MoreHorizontal className="w-4 h-4" />
+             <button className="p-3 rounded-xl hover:bg-brand-ivory/5 transition-all text-brand-ivory/40">
+                <SearchIcon className="w-5 h-5" />
              </button>
           </div>
         </header>
