@@ -7,18 +7,21 @@ import ChatInterface from '../chat/ChatInterface';
 import InsightsGrid from './InsightsGrid';
 import Navbar from '../layout/Navbar';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, MessageSquare, History, Settings, LogOut, Sparkles, CreditCard, PieChart, Bell, Target, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, History, Settings, LogOut, CreditCard, PieChart, Bell, Target, ChevronRight } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { generateWeeklyInsight } from '../../services/aiService';
 import SettingsModal from './SettingsModal';
 import SupportBot from '../chat/SupportBot';
 import { Toaster, toast } from 'sonner';
 import SubscriptionDetector from './SubscriptionDetector';
+import BudgetsView from './BudgetsView';
+import AlertsView from './AlertsView';
+import GoalsView from './GoalsView';
 
 export default function Dashboard({ user }: { user: User }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
-  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'history' | 'subs'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'history' | 'subs' | 'budgets' | 'alerts' | 'goals'>('chat');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -83,10 +86,15 @@ export default function Dashboard({ user }: { user: User }) {
       <main className="flex-1 overflow-hidden relative flex flex-col md:flex-row">
         <nav className="hidden md:flex flex-col w-72 border-r border-brand-ivory/5 p-6 space-y-2">
           <div className="mb-8 flex items-center gap-3 px-2">
-             <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-brand-charcoal" />
+             <div className="w-10 h-10 rounded-xl bg-brand-accent flex items-center justify-center shadow-[0_0_20px_rgba(198,169,107,0.2)]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-brand-charcoal">
+                   <path d="M4 4L12 20L20 4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
              </div>
-             <span className="font-display font-bold text-xl tracking-tight uppercase">Veltrix</span>
+             <div className="flex flex-col">
+               <span className="font-display font-bold text-xl tracking-tight uppercase leading-none">Veltrix</span>
+               <span className="text-[8px] font-bold text-brand-accent uppercase tracking-widest mt-1">Intelligence</span>
+             </div>
           </div>
 
           <NavItem 
@@ -114,20 +122,20 @@ export default function Dashboard({ user }: { user: User }) {
             label="Subscriptions" 
           />
           <NavItem 
-            active={false} 
-            onClick={() => toast.info("Coming soon")} 
+            active={activeTab === 'budgets'} 
+            onClick={() => setActiveTab('budgets')} 
             icon={<PieChart className="w-5 h-5" />} 
             label="Budgets" 
           />
            <NavItem 
-            active={false} 
-            onClick={() => toast.info("Coming soon")} 
+            active={activeTab === 'alerts'} 
+            onClick={() => setActiveTab('alerts')} 
             icon={<Bell className="w-5 h-5" />} 
             label="Alerts" 
           />
           <NavItem 
-            active={false} 
-            onClick={() => toast.info("Coming soon")} 
+            active={activeTab === 'goals'} 
+            onClick={() => setActiveTab('goals')} 
             icon={<Target className="w-5 h-5" />} 
             label="Goals" 
           />
@@ -203,6 +211,39 @@ export default function Dashboard({ user }: { user: User }) {
                 className="h-full overflow-y-auto no-scrollbar"
               >
                 <SubscriptionDetector expenses={expenses} />
+              </motion.div>
+            )}
+            {activeTab === 'budgets' && (
+              <motion.div
+                key="budgets"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="h-full overflow-y-auto no-scrollbar"
+              >
+                <BudgetsView expenses={expenses} />
+              </motion.div>
+            )}
+            {activeTab === 'alerts' && (
+              <motion.div
+                key="alerts"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="h-full overflow-y-auto no-scrollbar"
+              >
+                <AlertsView />
+              </motion.div>
+            )}
+            {activeTab === 'goals' && (
+              <motion.div
+                key="goals"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="h-full overflow-y-auto no-scrollbar"
+              >
+                <GoalsView />
               </motion.div>
             )}
           </AnimatePresence>

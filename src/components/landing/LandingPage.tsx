@@ -14,10 +14,15 @@ export default function LandingPage({ onShowAuth }: { onShowAuth: () => void }) 
       <nav className="fixed top-0 left-0 right-0 z-40 bg-brand-charcoal/80 backdrop-blur-md border-b border-brand-ivory/5 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-brand-charcoal" />
+            <div className="w-10 h-10 rounded-xl bg-brand-accent flex items-center justify-center shadow-[0_0_20px_rgba(198,169,107,0.3)]">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-brand-charcoal">
+                 <path d="M4 4L12 20L20 4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <span className="font-display text-xl font-bold tracking-tight">VELTRIX</span>
+            <div className="flex flex-col">
+              <span className="font-display text-xl font-bold tracking-tight uppercase leading-none">Veltrix</span>
+              <span className="text-[8px] font-bold text-brand-accent uppercase tracking-widest mt-0.5">Intelligence</span>
+            </div>
           </div>
           <button 
             onClick={handleLogin}
@@ -270,7 +275,14 @@ export default function LandingPage({ onShowAuth }: { onShowAuth: () => void }) 
       {/* Footer */}
       <footer className="py-20 px-6 border-t border-brand-ivory/5 text-center">
         <div className="max-w-7xl mx-auto">
-          <div className="font-display text-2xl font-bold mb-8">VELTRIX</div>
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-12 h-12 rounded-2xl bg-brand-accent flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-brand-charcoal">
+                 <path d="M4 4L12 20L20 4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="font-display text-3xl font-bold tracking-tight uppercase">VELTRIX</div>
+          </div>
           <div className="flex justify-center gap-8 text-brand-ivory/40 text-sm mb-12">
             <a href="#" className="hover:text-brand-ivory transition-colors">Privacy</a>
             <a href="#" className="hover:text-brand-ivory transition-colors">Terms</a>
