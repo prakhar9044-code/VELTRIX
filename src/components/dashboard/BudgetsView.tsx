@@ -33,15 +33,15 @@ export default function BudgetsView({ user, expenses, budgets }: { user: any, ex
   }));
 
   return (
-    <div className="space-y-10 pb-20">
-      <div className="flex items-center justify-between">
+    <div className="space-y-10 pb-32">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
           <h2 className="font-display text-4xl font-bold mb-2">Budgeting</h2>
           <p className="text-brand-ivory/30 text-sm">Synchronized limits for conscious allocation.</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)}
-          className="p-4 rounded-2xl bg-brand-accent text-brand-charcoal font-bold flex items-center gap-2 hover:scale-105 transition-all"
+          className="w-full sm:w-auto p-4 rounded-2xl bg-brand-accent text-brand-charcoal font-bold flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all"
         >
           <Plus className="w-5 h-5" />
           Set New Limit

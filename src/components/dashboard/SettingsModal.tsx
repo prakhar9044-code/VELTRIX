@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, User, Shield, Bell, CreditCard, HelpCircle, LogOut, History, ChevronRight, Check } from 'lucide-react';
-import { auth } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
 import { toast } from 'sonner';
 
 export default function SettingsModal({ isOpen, onClose, user }: { isOpen: boolean, onClose: () => void, user: any }) {
@@ -10,13 +12,85 @@ export default function SettingsModal({ isOpen, onClose, user }: { isOpen: boole
   const [notifsEnabled, setNotifsEnabled] = useState(true);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [isLoading, setIsLoading] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      toast.success("Veltrix Installed");
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && user) {
+      loadSettings();
+    }
+  }, [isOpen, user]);
+
+  const loadSettings = async () => {
+    setIsLoading(true);
+    try {
+      const docRef = doc(db, `users/${user.uid}/settings`, 'preferences');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setCurrency(data.currency || 'INR (₹)');
+        setTheme(data.theme || 'Dark');
+        setNotifsEnabled(data.notifications !== undefined ? data.notifications : true);
+      } else {
+        // Init default settings if don't exist
+        await setDoc(docRef, {
+          currency: 'INR (₹)',
+          theme: 'Dark',
+          notifications: true,
+          updatedAt: new Date().toISOString()
+        });
+      }
+    } catch (e) {
+      console.error("Error loading settings:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const savePreference = async (key: string, value: any) => {
+    try {
+      const docRef = doc(db, `users/${user.uid}/settings`, 'preferences');
+      await updateDoc(docRef, {
+        [key]: value,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error("Error saving preference:", e);
+      toast.error("Failed to save preference");
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!displayName.trim()) return;
+    try {
+      await updateProfile(auth.currentUser!, { displayName });
+      setIsEditingProfile(false);
+      toast.success("Profile updated successfully");
+    } catch (e) {
+      toast.error("Failed to update profile");
+    }
+  };
 
   if (!isOpen) return null;
-
-  const handleUpdateProfile = () => {
-    setIsEditingProfile(false);
-    toast.success("Profile updated successfully");
-  };
 
   return (
     <motion.div 
@@ -96,6 +170,7 @@ export default function SettingsModal({ isOpen, onClose, user }: { isOpen: boole
               onClick={() => {
                 const next = currency === 'INR (₹)' ? 'USD ($)' : 'INR (₹)';
                 setCurrency(next);
+                savePreference('currency', next);
                 toast.success(`Currency switched to ${next}`);
               }}
             />
@@ -106,6 +181,7 @@ export default function SettingsModal({ isOpen, onClose, user }: { isOpen: boole
               onClick={() => {
                 const next = theme === 'Dark' ? 'Light' : 'Dark';
                 setTheme(next);
+                savePreference('theme', next);
                 toast.info(`Theme switched to ${next}`);
               }}
             />
@@ -115,8 +191,10 @@ export default function SettingsModal({ isOpen, onClose, user }: { isOpen: boole
               isSwitch 
               switchActive={notifsEnabled}
               onSwitch={() => {
-                setNotifsEnabled(!notifsEnabled);
-                toast.success(`Notifications ${!notifsEnabled ? 'enabled' : 'disabled'}`);
+                const next = !notifsEnabled;
+                setNotifsEnabled(next);
+                savePreference('notifications', next);
+                toast.success(`Notifications ${next ? 'enabled' : 'disabled'}`);
               }}
             />
           </SettingsSection>
@@ -129,6 +207,14 @@ export default function SettingsModal({ isOpen, onClose, user }: { isOpen: boole
           {/* Data Section */}
           <SettingsSection title="Data">
             <SettingsItem icon={<History className="w-4 h-4 opacity-40" />} label="Export Data (.json)" hasArrow onClick={() => toast.success("Preparing your archive...")} />
+            {deferredPrompt && (
+              <SettingsItem 
+                icon={<Shield className="w-4 h-4 text-brand-accent animate-pulse" />} 
+                label="Install App" 
+                value="Offline Access"
+                onClick={handleInstall} 
+              />
+            )}
           </SettingsSection>
 
           {/* About Section */}

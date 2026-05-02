@@ -17,6 +17,7 @@ import SubscriptionDetector from './SubscriptionDetector';
 import BudgetsView from './BudgetsView';
 import AlertsView from './AlertsView';
 import GoalsView from './GoalsView';
+import ExpenseHistory from './ExpenseHistory';
 
 export default function Dashboard({ user }: { user: User }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -96,11 +97,12 @@ export default function Dashboard({ user }: { user: User }) {
   }, [expenses.length, insights.length, triggerAI, isGenerating]);
 
   return (
-    <div className="flex flex-col h-screen bg-brand-charcoal overflow-hidden">
+    <div className="flex flex-col h-screen bg-brand-charcoal overflow-hidden pwa-container">
       <Navbar user={user} insights={insights} />
       
       <main className="flex-1 overflow-hidden relative flex flex-col md:flex-row">
-        <nav className="hidden md:flex flex-col w-72 border-r border-brand-ivory/5 p-6 space-y-2">
+        {/* Desktop Sidebar */}
+        <nav className="hidden md:flex flex-col w-72 border-r border-brand-ivory/5 p-6 space-y-2 bg-brand-charcoal">
           <div className="mb-8 flex items-center gap-3 px-2">
              <div className="w-10 h-10 rounded-xl bg-brand-accent flex items-center justify-center shadow-[0_0_20px_rgba(198,169,107,0.2)]">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-brand-charcoal">
@@ -183,7 +185,7 @@ export default function Dashboard({ user }: { user: User }) {
         </nav>
 
         {/* Content Area */}
-        <div className="flex-1 relative flex flex-col overflow-hidden px-4 md:px-8 py-4">
+        <div className="flex-1 relative flex flex-col overflow-hidden px-4 md:px-8 py-4 pb-24 md:pb-4">
           <AnimatePresence mode="wait">
             {activeTab === 'chat' && (
               <motion.div
@@ -271,7 +273,13 @@ export default function Dashboard({ user }: { user: User }) {
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden flex h-20 items-center justify-around border-t border-brand-ivory/5 bg-brand-charcoal px-4 pb-2 z-50">
+      <nav className="md:hidden flex h-20 items-center justify-around border-t border-brand-ivory/5 bg-brand-charcoal/80 backdrop-blur-xl px-4 pb-safe z-50 fixed bottom-0 left-0 right-0">
+        <MobileNavItem 
+          active={activeTab === 'chat'} 
+          onClick={() => setActiveTab('chat')} 
+          icon={<MessageSquare className="w-5 h-5" />} 
+          label="AI"
+        />
         <MobileNavItem 
           active={activeTab === 'dashboard'} 
           onClick={() => setActiveTab('dashboard')} 
@@ -279,10 +287,10 @@ export default function Dashboard({ user }: { user: User }) {
           label="Home"
         />
         <MobileNavItem 
-          active={activeTab === 'chat'} 
-          onClick={() => setActiveTab('chat')} 
-          icon={<MessageSquare className="w-5 h-5" />} 
-          label="AI"
+          active={activeTab === 'history'} 
+          onClick={() => setActiveTab('history')} 
+          icon={<History className="w-5 h-5" />} 
+          label="Stream"
         />
         <MobileNavItem 
           active={activeTab === 'alerts'} 
@@ -321,42 +329,18 @@ function MobileNavItem({ active, onClick, icon, label }: { active: boolean, onCl
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1 transition-all ${
+      className={`min-h-[44px] flex flex-col items-center justify-center gap-1 transition-all active:scale-90 ${
         active 
           ? 'text-brand-accent' 
-          : 'text-brand-ivory/30'
+          : 'text-brand-ivory/30 hover:text-brand-ivory/50'
       }`}
     >
-      <div className={`p-2.5 rounded-xl transition-all ${active ? 'bg-brand-accent/10' : ''}`}>
+      <div className={`p-2.5 rounded-xl transition-all ${active ? 'bg-brand-accent/10 border border-brand-accent/20' : ''}`}>
         {icon}
       </div>
-      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+      <span className="text-[9px] font-bold uppercase tracking-widest">{label}</span>
     </button>
   );
 }
 
-function ExpenseHistory({ expenses }: { expenses: Expense[] }) {
-  return (
-    <div className="space-y-4 pb-12">
-      <h2 className="font-display text-2xl font-bold mb-6">Recent Activity</h2>
-      {expenses.length === 0 ? (
-        <div className="text-center py-20 text-brand-ivory/30">No expenses logged yet.</div>
-      ) : (
-        expenses.map(expense => (
-          <div key={expense.id} className="p-4 rounded-xl border border-brand-ivory/5 bg-brand-slate/20 flex items-center justify-between group hover:border-brand-accent/30 transition-all">
-            <div>
-              <div className="font-medium text-lg">{expense.description}</div>
-              <div className="text-sm text-brand-ivory/40 flex items-center gap-2">
-                <span className="bg-brand-slate px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">{expense.category}</span>
-                {new Date(expense.timestamp).toLocaleDateString()}
-              </div>
-            </div>
-            <div className="text-xl font-display font-bold">
-              ₹{expense.amount.toLocaleString()}
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
-}
+// Remove ExpenseHistory from Dashboard.tsx as it is now modularized
