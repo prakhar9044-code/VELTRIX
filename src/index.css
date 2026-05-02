@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-charcoal: #0F1115;
+  --color-brand-ivory: #F5F5F3;
+  --color-brand-slate: #2A2D34;
+  --color-brand-accent: #C5A059; /* Subtle gold accent */
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-charcoal text-brand-ivory font-sans antialiased;
+  }
+}
+
+.glass-card {
+  @apply bg-brand-slate/40 backdrop-blur-md border border-brand-ivory/10;
+}
+
+.premium-gradient {
+  background: linear-gradient(135deg, #0F1115 0%, #1A1D23 100%);
+}
+
+/* Hide scrollbar for clean chat UI */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

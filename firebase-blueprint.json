@@ -1,0 +1,91 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "currency": { "type": "string", "enum": ["USD", "INR", "EUR", "GBP"] },
+            "theme": { "type": "string", "enum": ["light", "dark", "system"] }
+          }
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "An individual expense entry",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "rawText": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "isAIProcessed": { "type": "boolean" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["userId", "amount", "category", "timestamp"]
+    },
+    "Insight": {
+      "title": "Insight",
+      "description": "AI-generated financial insight",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["weekly_summary", "leak_detection", "pattern_alert", "coaching_nudge"] },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "data": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["userId", "type", "content", "timestamp"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "A recurring expense",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "billingCycle": { "type": "string", "enum": ["monthly", "yearly"] },
+        "nextBillingDate": { "type": "string", "format": "date-time" },
+        "category": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["userId", "name", "amount", "billingCycle"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Root user document"
+    },
+    "/users/{userId}/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Sub-collection for expenses"
+    },
+    "/users/{userId}/insights/{insightId}": {
+      "schema": "Insight",
+      "description": "Sub-collection for AI insights"
+    },
+    "/users/{userId}/subscriptions/{subId}": {
+      "schema": "Subscription",
+      "description": "Sub-collection for subscriptions"
+    }
+  }
+}
