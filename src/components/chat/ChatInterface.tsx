@@ -5,7 +5,8 @@ import { db, handleFirestoreError } from '../../lib/firebase';
 import { parseExpense } from '../../lib/gemini';
 import { OperationType, Expense } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Sparkles, User as UserIcon } from 'lucide-react';
+import { Send, Sparkles, User as UserIcon, MessageSquare } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -61,6 +62,9 @@ export default function ChatInterface({ user, expenses }: { user: User, expenses
       });
 
       const responseText = `Logged ₹${parsedData.amount} for ${parsedData.description} under ${parsedData.category}.`;
+      toast.success("Expense Logged", {
+        description: `₹${parsedData.amount} -> ${parsedData.category}`,
+      });
       
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
@@ -70,6 +74,9 @@ export default function ChatInterface({ user, expenses }: { user: User, expenses
       }]);
     } catch (error) {
       console.error(error);
+      toast.error("Failed to log expense", {
+        description: "Please check your connectivity or try again."
+      });
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         type: 'ai',

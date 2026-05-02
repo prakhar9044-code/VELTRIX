@@ -10,12 +10,20 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LayoutDashboard, MessageSquare, History, Settings, LogOut, Sparkles } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { generateWeeklyInsight } from '../../services/aiService';
+import SettingsModal from './SettingsModal';
+import SupportBot from '../chat/SupportBot';
+import { Toaster, toast } from 'sonner';
 
 export default function Dashboard({ user }: { user: User }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'history'>('chat');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    toast.success(`Welcome back, ${user.displayName || 'Friend'}`);
+  }, [user]);
 
   const triggerAI = useCallback(async () => {
     if (expenses.length < 3 || insights.length > 0) return;
@@ -85,7 +93,10 @@ export default function Dashboard({ user }: { user: User }) {
             label="Log History" 
           />
           <div className="mt-auto pt-6 border-t border-brand-ivory/5 space-y-2">
-            <button className="flex items-center gap-3 w-full p-3 rounded-xl text-brand-ivory/40 hover:text-brand-ivory hover:bg-brand-slate/50 transition-all">
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="flex items-center gap-3 w-full p-3 rounded-xl text-brand-ivory/40 hover:text-brand-ivory hover:bg-brand-slate/50 transition-all"
+            >
               <Settings className="w-5 h-5" />
               Settings
             </button>
@@ -138,6 +149,11 @@ export default function Dashboard({ user }: { user: User }) {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Support and Modals */}
+      <SupportBot />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
+      <Toaster richColors position="top-right" theme="dark" />
 
       {/* Mobile Navigation */}
       <nav className="md:hidden flex h-20 items-center justify-around border-t border-brand-ivory/5 bg-brand-charcoal px-6 pb-2">
