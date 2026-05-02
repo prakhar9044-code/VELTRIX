@@ -7,17 +7,18 @@ import ChatInterface from '../chat/ChatInterface';
 import InsightsGrid from './InsightsGrid';
 import Navbar from '../layout/Navbar';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, MessageSquare, History, Settings, LogOut, Sparkles } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, History, Settings, LogOut, Sparkles, CreditCard } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { generateWeeklyInsight } from '../../services/aiService';
 import SettingsModal from './SettingsModal';
 import SupportBot from '../chat/SupportBot';
 import { Toaster, toast } from 'sonner';
+import SubscriptionDetector from './SubscriptionDetector';
 
 export default function Dashboard({ user }: { user: User }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
-  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'history'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'history' | 'subs'>('chat');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -92,6 +93,12 @@ export default function Dashboard({ user }: { user: User }) {
             icon={<History className="w-5 h-5" />} 
             label="Log History" 
           />
+          <NavItem 
+            active={activeTab === 'subs'} 
+            onClick={() => setActiveTab('subs')} 
+            icon={<CreditCard className="w-5 h-5" />} 
+            label="Subscriptions" 
+          />
           <div className="mt-auto pt-6 border-t border-brand-ivory/5 space-y-2">
             <button 
               onClick={() => setIsSettingsOpen(true)}
@@ -144,6 +151,17 @@ export default function Dashboard({ user }: { user: User }) {
                 className="h-full overflow-y-auto no-scrollbar"
               >
                 <ExpenseHistory expenses={expenses} />
+              </motion.div>
+            )}
+            {activeTab === 'subs' && (
+              <motion.div
+                key="subs"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="h-full overflow-y-auto no-scrollbar"
+              >
+                <SubscriptionDetector expenses={expenses} />
               </motion.div>
             )}
           </AnimatePresence>

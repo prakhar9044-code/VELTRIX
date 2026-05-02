@@ -22,14 +22,15 @@ export default function SupportBot() {
     setIsTyping(true);
 
     try {
-      const chat = ai.models.startChat({
+      const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
+        contents: messages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n') + `\nUser: ${userText}`,
         config: {
-          systemInstruction: "You are the Veltrix Concierge, a premium support assistant for a micro-expense tracking app. Be helpful, concise, and professional. You can guide users on how to log expenses (e.g. 'Coffee 50'), explain insights, and help with app navigation.",
+          systemInstruction: "You are the Veltrix Concierge. Be helpful, concise, and professional."
         }
       });
-      const result = await chat.sendMessage(userText);
-      setMessages(prev => [...prev, { role: 'model', text: result.response.text() }]);
+      
+      setMessages(prev => [...prev, { role: 'model', text: response.text || "I'm having trouble connecting right now." }]);
     } catch (err) {
       toast.error("Support system temporarily busy");
     } finally {

@@ -3,9 +3,10 @@ import { User } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError } from '../../lib/firebase';
 import { parseExpense } from '../../lib/gemini';
+import ai from '../../lib/gemini';
 import { OperationType, Expense } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Sparkles, User as UserIcon, MessageSquare } from 'lucide-react';
+import { Send, Sparkles, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Message {
@@ -46,7 +47,29 @@ export default function ChatInterface({ user, expenses }: { user: User, expenses
     try {
       const parsedData = await parseExpense(input);
       
-      // Save to Firebase
+      // Check if it's an analytical question instead of an expense log
+      const isQuestion = input.toLowerCase().includes('?') || input.toLowerCase().includes('how') || input.toLowerCase().includes('where');
+      
+      if (isQuestion) {
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `Context: User has logged ${expenses.length} expenses totalling ₹${expenses.reduce((s, e) => s+e.amount, 0)}. Recent categories: ${[...new Set(expenses.map(e => e.category))].join(', ')}. Question: ${input}`,
+          config: {
+            systemInstruction: "You are Veltrix Portfolio Analyst. Be professional and concise.",
+          }
+        });
+        
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          type: 'ai',
+          text: response.text || "I couldn't process that. Try again.",
+          timestamp: new Date()
+        }]);
+        setIsTyping(false);
+        return;
+      }
+
+      // Proceed with logging expense...
       const expensesPath = `users/${user.uid}/expenses`;
       await addDoc(collection(db, expensesPath), {
         userId: user.uid,
